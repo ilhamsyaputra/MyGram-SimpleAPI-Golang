@@ -10,6 +10,28 @@ import (
 	"github.com/google/uuid"
 )
 
+func EmailRegistered(userRegister *entity.User) bool {
+	db := config.GetDB()
+
+	rowsAffected := db.First(&userRegister, "email = ?", userRegister.Email).RowsAffected
+
+	if rowsAffected == 1 {
+		return true
+	}
+	return false
+}
+
+func UsernameTaken(userRegister *entity.User) bool {
+	db := config.GetDB()
+
+	rowsAffected := db.First(&userRegister, "username = ?", userRegister.Username).RowsAffected
+
+	if rowsAffected == 1 {
+		return true
+	}
+	return false
+}
+
 func UserRegisterHandler(ctx *gin.Context) {
 	db := config.GetDB()
 	userRegister := entity.User{}
@@ -18,6 +40,22 @@ func UserRegisterHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"statusCode": http.StatusBadRequest,
 			"message":    "Bad Request",
+		})
+		return
+	}
+
+	if EmailRegistered(&userRegister) {
+		ctx.JSON(http.StatusConflict, gin.H{
+			"statusCode": http.StatusConflict,
+			"message":    "Conflict: Email already registered",
+		})
+		return
+	}
+
+	if UsernameTaken(&userRegister) {
+		ctx.JSON(http.StatusConflict, gin.H{
+			"statusCode": http.StatusConflict,
+			"message":    "Conflict: Username already taken",
 		})
 		return
 	}
