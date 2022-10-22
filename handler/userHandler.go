@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func RegisterUserHandler(ctx *gin.Context) {
+func UserRegisterHandler(ctx *gin.Context) {
 	db := config.GetDB()
 	userRegister := entity.User{}
 
@@ -44,5 +44,47 @@ func RegisterUserHandler(ctx *gin.Context) {
 			Email:    userRegister.Email,
 			Age:      userRegister.Age,
 		},
+	})
+}
+
+func UserLoginHandler(ctx *gin.Context) {
+	db := config.GetDB()
+	user := entity.User{}
+	password := ""
+
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"message":    "Bad Request",
+		})
+		return
+	}
+
+	password = user.Password
+
+	err := db.Debug().Where("email = ?", user.Email).Take(&user).Error
+
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"statusCode": http.StatusUnauthorized,
+			"message":    "Unauthorized: invalid email/password",
+		})
+		return
+	}
+
+	comparePass := helper.ComparePass([]byte(user.Password), []byte(password))
+
+	if !comparePass {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"statusCode": http.StatusUnauthorized,
+			"message":    "Unauthorized: invalid email/password",
+		})
+		return
+	}
+
+	token := helper.GenerateToken(user.ID, user.Email)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"token": token,
 	})
 }

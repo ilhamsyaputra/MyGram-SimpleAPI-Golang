@@ -8,3 +8,9 @@ func HashPass(p string) string {
 	hash, _ := bcrypt.GenerateFromPassword(password, salt)
 	return string(hash)
 }
+
+func ComparePass(h, p []byte) bool {
+	hash, pass := []byte(h), []byte(p)
+	err := bcrypt.CompareHashAndPassword(hash, pass)
+	return err == nil
+}
