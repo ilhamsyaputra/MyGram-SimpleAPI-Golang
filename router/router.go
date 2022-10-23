@@ -15,7 +15,7 @@ func StartApp() *gin.Engine {
 		userRouter.POST("/register", handler.UserRegisterHandler)
 		userRouter.POST("/login", handler.UserLoginHandler)
 		userRouter.Use(middleware.Authentication())
-		userRouter.PUT("/:username", middleware.PutAuthorization(), handler.UserUpdateHandler)
+		userRouter.PUT("/", middleware.Authorization(), handler.UserUpdateHandler)
 		userRouter.DELETE("/", middleware.Authorization(), handler.DeleteUserHandler)
 	}
 

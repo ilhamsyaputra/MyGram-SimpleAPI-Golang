@@ -127,7 +127,6 @@ func UserLoginHandler(ctx *gin.Context) {
 
 func UserUpdateHandler(ctx *gin.Context) {
 	db := config.GetDB()
-	username := ctx.Param("username")
 	userData := ctx.MustGet("userData").(jwt.MapClaims)
 	user := entity.User{}
 	UserID := userData["id"].(string)
@@ -158,7 +157,7 @@ func UserUpdateHandler(ctx *gin.Context) {
 
 	user.ID = UserID
 
-	err := db.Model(&user).Where("username = ?", username).Updates(
+	err := db.Model(&user).Where("id = ?", UserID).Updates(
 		entity.User{
 			Email:    user.Email,
 			Username: user.Username,
