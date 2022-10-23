@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Authorization() gin.HandlerFunc {
+func PutAuthorization() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		db := config.GetDB()
 		username := ctx.Param("username")
@@ -38,7 +38,7 @@ func Authorization() gin.HandlerFunc {
 	}
 }
 
-func DeleteAuthorization() gin.HandlerFunc {
+func Authorization() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		db := config.GetDB()
 		userData := ctx.MustGet("userData").(jwt.MapClaims)
