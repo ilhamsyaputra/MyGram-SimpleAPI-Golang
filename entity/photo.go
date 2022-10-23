@@ -17,6 +17,7 @@ type Photo struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Comments  []Comment `gorm:"foreignKey:PhotoID"`
+	User      User      `gorn:"foreignKey:PhotoID"`
 }
 
 type PostPhotoResponse struct {
@@ -26,6 +27,26 @@ type PostPhotoResponse struct {
 	PhotoURL  string    `json:"photo_url"`
 	UserID    string    `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type PutPhotoResponse struct {
+	ID        string    `gorm:"primaryKey" json:"id"`
+	Title     string    `json:"title"`
+	Caption   string    `json:"caption"`
+	PhotoURL  string    `json:"photo_url"`
+	UserID    string    `json:"user_id"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type GetAllPhotosResponse struct {
+	ID        string                   `gorm:"primaryKey" json:"id"`
+	Title     string                   `json:"title"`
+	Caption   string                   `json:"caption"`
+	PhotoURL  string                   `json:"photo_url"`
+	UserID    string                   `json:"user_id"`
+	CreatedAt time.Time                `json:"created_at"`
+	UpdatedAt time.Time                `json:"updated_at"`
+	User      GetAllPhotosUserResponse `json:"User"`
 }
 
 func (p *Photo) BeforeCreate(tx *gorm.DB) (err error) {

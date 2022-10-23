@@ -37,6 +37,11 @@ type UserUpdateResponse struct {
 	UpdatedAt time.Time
 }
 
+type GetAllPhotosUserResponse struct {
+	Username string
+	Email    string
+}
+
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 
 	// validasi field email

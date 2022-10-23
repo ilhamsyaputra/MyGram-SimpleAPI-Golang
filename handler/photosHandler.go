@@ -53,8 +53,9 @@ func PostPhotoHandler(ctx *gin.Context) {
 func GetAllPhotosHandler(ctx *gin.Context) {
 	db := config.GetDB()
 	photos := []entity.Photo{}
+	responseData := []entity.GetAllPhotosResponse{}
 
-	err := db.Find(&photos).Error
+	err := db.Preload("User").Find(&photos).Error
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -63,9 +64,23 @@ func GetAllPhotosHandler(ctx *gin.Context) {
 		})
 	}
 
+	for _, photo := range photos {
+		temp := entity.GetAllPhotosResponse{}
+		temp.ID = photo.ID
+		temp.Title = photo.Title
+		temp.Caption = photo.Caption
+		temp.PhotoURL = photo.PhotoURL
+		temp.UserID = photo.UserID
+		temp.CreatedAt = photo.CreatedAt
+		temp.UpdatedAt = photo.UpdatedAt
+		temp.User.Email = photo.User.Email
+		temp.User.Username = photo.User.Username
+		responseData = append(responseData, temp)
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"status":  http.StatusOK,
-		"message": "Success retrieve orders data",
-		"data":    photos,
+		"message": "Success retrieve all photos data",
+		"data":    responseData,
 	})
 }
