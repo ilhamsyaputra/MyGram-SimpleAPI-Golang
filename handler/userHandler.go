@@ -6,8 +6,8 @@ import (
 	"MyGram/helper"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func EmailRegistered(userRegister *entity.User) bool {
@@ -60,15 +60,12 @@ func UserRegisterHandler(ctx *gin.Context) {
 		return
 	}
 
-	userRegister.ID = uuid.New().String()
-	userRegister.Password = helper.HashPass(userRegister.Password)
-
 	err := db.Create(&userRegister).Error
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"statusCode": http.StatusInternalServerError,
-			"message":    "Something is wrong",
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"message":    "Bad Request: " + err.Error(),
 		})
 		return
 	}
@@ -124,5 +121,64 @@ func UserLoginHandler(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"token": token,
+	})
+}
+
+func UserUpdateHandler(ctx *gin.Context) {
+	db := config.GetDB()
+	username := ctx.Param("username")
+	userData := ctx.MustGet("userData").(jwt.MapClaims)
+	user := entity.User{}
+	UserID := userData["id"].(string)
+
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"message":    "Bad Request",
+		})
+		return
+	}
+
+	if EmailRegistered(&user) {
+		ctx.JSON(http.StatusConflict, gin.H{
+			"statusCode": http.StatusConflict,
+			"message":    "Conflict: Email already registered",
+		})
+		return
+	}
+
+	if UsernameTaken(&user) {
+		ctx.JSON(http.StatusConflict, gin.H{
+			"statusCode": http.StatusConflict,
+			"message":    "Conflict: Username already taken",
+		})
+		return
+	}
+
+	user.ID = UserID
+
+	err := db.Model(&user).Where("username = ?", username).Updates(
+		entity.User{
+			Email:    user.Email,
+			Username: user.Username,
+		},
+	).Error
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"message":    "Error: " + err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"statusCode": http.StatusOK,
+		"message":    "Success update user",
+		"data": entity.UserUpdateResponse{
+			ID:        user.ID,
+			Username:  user.Email,
+			Email:     user.Email,
+			UpdatedAt: user.UpdatedAt,
+		},
 	})
 }

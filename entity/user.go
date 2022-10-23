@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -29,6 +30,13 @@ type UserRegisterResponse struct {
 	Age      int
 }
 
+type UserUpdateResponse struct {
+	ID        string
+	Username  string
+	Email     string
+	UpdatedAt time.Time
+}
+
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 
 	// validasi field email
@@ -50,9 +58,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	// Validasi password
 	if helper.IsEmpty(u.Password) {
 		err = errors.New("Password can't be empty")
-	}
-
-	if len(u.Password) < 6 {
+	} else if len(u.Password) < 6 {
 		err = errors.New("Password must have at least 6 characters length")
 	}
 
@@ -64,6 +70,9 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	if u.Age < 8 {
 		err = errors.New("Age must be at least 8 years old")
 	}
+
+	u.ID = uuid.New().String()
+	u.Password = helper.HashPass(u.Password)
 
 	return
 }
