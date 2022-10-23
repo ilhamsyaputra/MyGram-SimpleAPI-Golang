@@ -4,6 +4,7 @@ import (
 	"MyGram/config"
 	"MyGram/entity"
 	"MyGram/helper"
+	"fmt"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -181,4 +182,32 @@ func UserUpdateHandler(ctx *gin.Context) {
 			UpdatedAt: user.UpdatedAt,
 		},
 	})
+}
+
+func DeleteUserHandler(ctx *gin.Context) {
+	db := config.GetDB()
+	userData := ctx.MustGet("userData").(jwt.MapClaims)
+	UserID := userData["id"].(string)
+
+	comments := entity.Comment{}
+	socialMedia := entity.SocialMedia{}
+	photos := entity.Photo{}
+	user := entity.User{}
+
+	deleteAction := db.Where("user_id = ?", UserID).Delete(&socialMedia, &comments, &photos)
+
+	if deleteAction.Error != nil {
+		fmt.Println("Error deleting user:", deleteAction.Error.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"statusCode": http.StatusBadRequest,
+			"message":    "Error: " + deleteAction.Error.Error(),
+		})
+	} else {
+		db.Where("id = ?", UserID).Delete(&user)
+		ctx.JSON(http.StatusOK, gin.H{
+			"statusCode": http.StatusOK,
+			"message":    "Your account has been successfully deleted",
+		})
+		return
+	}
 }
