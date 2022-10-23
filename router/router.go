@@ -19,5 +19,11 @@ func StartApp() *gin.Engine {
 		userRouter.DELETE("/", middleware.DeleteAuthorization(), handler.DeleteUserHandler)
 	}
 
+	photoRouter := r.Group("/photos")
+	{
+		photoRouter.Use(middleware.Authentication())
+		photoRouter.POST("/", handler.PostPhotoHandler)
+	}
+
 	return r
 }

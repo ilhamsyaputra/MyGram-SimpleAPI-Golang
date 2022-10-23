@@ -18,9 +18,9 @@ type User struct {
 	Age          int           `json:"age"`
 	CreatedAt    time.Time     `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt    time.Time     `gorm:"column:updated_at" json:"updated_at"`
-	SocialMedias []SocialMedia `gorm:"foreignKey:ID"`
-	Comments     []Comment     `gorm:"foreignKey:ID"`
-	Photos       []Photo       `gorm:"foreignKey:ID"`
+	SocialMedias []SocialMedia `gorm:"foreignKey:UserID"`
+	Comments     []Comment     `gorm:"foreignKey:UserID"`
+	Photos       []Photo       `gorm:"foreignKey:UserID"`
 }
 
 type UserRegisterResponse struct {

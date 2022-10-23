@@ -40,7 +40,7 @@ func UserRegisterHandler(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&userRegister); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"statusCode": http.StatusBadRequest,
-			"message":    "Bad Request",
+			"message":    "Bad Request: " + err.Error(),
 		})
 		return
 	}
